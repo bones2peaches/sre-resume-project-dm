@@ -87,23 +87,13 @@ jobs:
           export DB_PASSWORD="$(jq -r '.password' <<< ${SECRET} )"
           echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
 
-      - name: Alembic Check
-        id: alembic_check
-        working-directory: ./api
-        run: |
-          result=$(alembic check)
-          echo "output=$result" >> $GITHUB_ENV
-          echo ::set-output name=has_changes::$(echo $result | grep -c "FAILED")
-
       - name: Generate Alembic Revision
-        if: steps.alembic_check.outputs.has_changes == '1'
         working-directory: ./api
         run: |
           alembic revision --autogenerate -m "GITHUBSHA ${{ github.sha }} TEST DB RUN"
           alembic upgrade head
 
       - name: Sync Changes to S3
-        if: steps.alembic_check.outputs.has_changes == '1'
         working-directory: ./api
         run: |
           aws s3 sync alembic/versions s3://${{ secrets.BUCKET_NAME }}/resume/test/alembic
