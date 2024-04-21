@@ -1,5 +1,5 @@
 import os
-import quo
+
 from urllib.parse import quote_plus
 from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
