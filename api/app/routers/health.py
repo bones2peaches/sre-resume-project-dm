@@ -3,12 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.database import get_db
 
-import pytest
-
 
 router = APIRouter()
-
-pytestmark = pytest.mark.anyio
 
 
 @router.get("", status_code=status.HTTP_200_OK)
