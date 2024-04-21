@@ -1,0 +1,217 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PORT: ${DB_PORT}
+    volumes:
+      - /tmp/postgre:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:5432"
+    networks:
+      - testing-network
+
+  connection:
+    build: ./services/postgres
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+    depends_on:
+      - postgres
+    networks:
+      - testing-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PG_ADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PG_ADMIN_PASSWORD}
+    depends_on:
+      - postgres
+    ports:
+      - "5050:80"
+    networks:
+      - testing-network
+
+  influxdb:
+    image: influxdb:1.8
+    networks:
+      - testing-network
+    environment:
+      - INFLUXDB_DB=dev
+      - INFLUXDB_ADMIN_USER=dev
+      - INFLUXDB_ADMIN_PASSWORD=dev
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./services/prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - testing-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    depends_on:
+      - prometheus
+      - postgres
+      - influxdb
+      - fast-api
+      - nchan-ws
+
+    volumes:
+      - ./services/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "8000:3000"
+    networks:
+      - testing-network
+
+  fast-api:
+    container_name: api
+
+    build: ./api
+    # command: CMD ["uvicorn", "app.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "5000"]
+    # #  #"tail -f /dev/null"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+      - redis-cluster-creator
+    volumes:
+      - ./api:/home/code
+    environment:
+      - STAGE=DEV
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - NCHAN_USERNAME=${NCHAN_USERNAME}
+      - NCHAN_PASSWORD=${NCHAN_PASSWORD}
+      - NCHAN_PROTOCOL=${NCHAN_PROTOCOL}
+      - NCHAN_HOST=${NCHAN_HOST}
+      - NCHAN_PORT=${NCHAN_PORT}
+    networks:
+      - testing-network
+
+  nchan-ws:
+    container_name: nchan
+
+    build: ./services/nchan
+    ports:
+      - "80:80"
+    depends_on:
+      - fast-api
+      - redis-cluster-creator
+    environment:
+      - NCHAN_USERNAME=${NCHAN_USERNAME}
+      - NCHAN_PASSWORD=${NCHAN_PASSWORD}
+    networks:
+      - testing-network
+  redis-node-1:
+    container_name: r-1
+    image: redis:latest
+    ports:
+      - 7000:7000
+      - 17000:17000
+
+    networks:
+      - testing-network
+    hostname: redis-node-1
+    volumes:
+      - ./services/redis/7000:/redis
+    command: redis-server /redis/redis.conf
+  redis-node-2:
+    container_name: r-2
+    image: redis:latest
+    ports:
+      - 7001:7001
+      - 17001:17001
+    networks:
+      - testing-network
+    hostname: redis-node-2
+    volumes:
+      - ./services/redis/7001:/redis
+    command: redis-server /redis/redis.conf
+
+  redis-node-3:
+    container_name: r-3
+    image: redis:latest
+    ports:
+      - 7002:7002
+      - 17002:17002
+    networks:
+      - testing-network
+    hostname: redis-node-3
+    volumes:
+      - ./services/redis/7002:/redis
+    command: redis-server /redis/redis.conf
+
+  redis-node-4:
+    container_name: r-4
+    image: redis:latest
+    ports:
+      - 7003:7003
+      - 17003:17003
+    networks:
+      - testing-network
+    hostname: redis-node-4
+    volumes:
+      - ./services/redis/7003:/redis
+    command: redis-server /redis/redis.conf
+
+  redis-node-5:
+    container_name: r-5
+    image: redis:latest
+    ports:
+      - 7004:7004
+      - 17004:17004
+    networks:
+      - testing-network
+    hostname: redis-node-5
+    volumes:
+      - ./services/redis/7004:/redis
+    command: redis-server /redis/redis.conf
+
+  redis-node-6:
+    container_name: r-6
+    image: redis:latest
+    ports:
+      - 7005:7005
+      - 17005:17005
+    networks:
+      - testing-network
+    hostname: redis-node-6
+    volumes:
+      - ./services/redis/7005:/redis
+    command: redis-server /redis/redis.conf
+
+  redis-cluster-creator:
+    image: redis:latest
+    ports:
+      - 6999:6999
+    networks:
+      - testing-network
+    command: redis-cli -p 7000 --cluster create redis-node-1:7000 redis-node-2:7001 redis-node-3:7002 redis-node-4:7003 redis-node-5:7004 redis-node-6:7005 --cluster-replicas 1 --cluster-yes
+    depends_on:
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+      - redis-node-5
+      - redis-node-6
+
+networks:
+  testing-network:
+    external: true

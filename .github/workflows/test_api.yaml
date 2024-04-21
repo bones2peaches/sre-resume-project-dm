@@ -1,0 +1,36 @@
+name: Build Projects
+
+on:
+  pull_request:
+    branches:
+      - "feature-*"
+jobs:
+  unit-test-api:
+    runs-on: ubuntu-latest
+    environment: test
+    env:
+      PYTHONPATH: "${{ github.workspace }}/api"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            api
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: install python dependencies
+        working-directory: ./api
+        run: |
+          pip install -r requirements.txt
+
+      - name: run api unit tests
+        working-directory: ./api
+        run: |
+          export STAGE=UNIT
+          pytest tests/unit
+      - name: complete
+        run: |
+          echo "PIPELINE RAN"
