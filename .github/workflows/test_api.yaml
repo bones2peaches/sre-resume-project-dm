@@ -42,6 +42,12 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: us-east-1
       AWS_DEFAULT_OUTPUT: json
+
+      DB_USER: "${{secrets.DB_USER }}"
+      DB_PORT: "${{secrets.DB_PORT }}"
+      DB_HOST: "${{secrets.DB_HOST }}"
+      SECRET_ID: "${{secrets.DB_SECRET_ARN }}"
+      DB_NAME: postgres
       STAGE: TEST
 
     steps:
@@ -72,15 +78,13 @@ jobs:
 
       - name: Prepare Alembic Environment
         working-directory: ./api
-        env:
-          DB_USER: "${{secrets.DB_USER }}"
-          DB_PORT: "${{secrets.DB_PORT }}"
-          DB_HOST: "${{secrets.DB_HOST }}"
-          SECRET_ID: "${{secrets.DB_SECRET_ARN }}"
-          DB_NAME: postgres
+
         run: |
           rm -rf alembic/versions
           aws s3 sync s3://${{secrets.BUCKET_NAME}}/resume/alembic alembic/versions
+          SECRET=$(aws secretsmanager get-secret-value --secret-id $SECRET_ID --query SecretString --output text)
+          export DB_PASSWORD="$(jq -r '.password' <<< ${SECRET} )"
+          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
 
       - name: Generate Alembic Revision
         working-directory: ./api
@@ -102,6 +106,4 @@ jobs:
       - name: run api integration test
         working-directory: ./api
         run: |
-          SECRET=$(aws secretsmanager get-secret-value --secret-id $SECRET_ID --query SecretString --output text)
-          export DB_PASSWORD="$(jq -r '.password' <<< ${SECRET} )"
           pytest tests/integration
