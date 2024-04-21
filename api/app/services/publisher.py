@@ -32,7 +32,17 @@ class HttpPublisher:
         self.base_url = f"{self.protocol}://{self.host}:{self.port}"
         logging.info(f"NCHAN BASE URL: {self.base_url}")
 
+        self.stage = os.getenv("STAGE")
+
+    def check_stage(self):
+        if self.stage not in ["E2E", "PROD"]:
+            return "skip"
+
     def update_user_notifications(self, user_id: str, notifications):
+        check = self.check_stage()
+        if check == "skip":
+            return None
+
         url = f"{self.base_url}/internal/notifications?channel_id={user_id}"
         logging.warn(f"DELTE HEADERS : {self.headers}")
 
@@ -47,6 +57,10 @@ class HttpPublisher:
         logging.warn(f"POST EVENTS NOTIFIXATIONS STATUS CODE : {post.status_code}")
 
     def delete_user_notifications(self, user_id: str):
+        check = self.check_stage()
+        if check == "skip":
+            return None
+
         url = f"{self.base_url}/internal/notifications/{user_id}/users"
 
         logging.warn(f"DELTE HEADERS : {self.headers}")
@@ -55,6 +69,9 @@ class HttpPublisher:
         logging.warn(f"Delete EVENTS NOTIFIXATIONS STATUS CODE : {delete.status_code}")
 
     def count_update(self, event: NchanResponse | str):
+        check = self.check_stage()
+        if check == "skip":
+            return None
         if isinstance(event.data, CountUpdate) is False:
             raise ValueError("Nchan Response data must be Count Update")
         if event.event != "count_update":
@@ -88,6 +105,9 @@ class HttpPublisher:
     def publish_chatroom_users(
         self, event: NchanResponse, chatroom_id: uuid.UUID | str
     ):
+        check = self.check_stage()
+        if check == "skip":
+            return None
         if isinstance(event.data, ChatroomUsers) is False:
             raise ValueError("Nchan Response data must be ChatroomUsers")
         if event.event != "user":
@@ -113,6 +133,9 @@ class HttpPublisher:
                     return post.text
 
     def notify_chatroom_users(self, notification: Notification, user_ids: str):
+        check = self.check_stage()
+        if check == "skip":
+            return None
         if isinstance(notification.event, NotificationMessage) is False:
             raise ValueError("Type of Notification must be Message")
         else:
