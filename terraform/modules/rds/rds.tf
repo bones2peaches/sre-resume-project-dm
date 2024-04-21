@@ -14,7 +14,7 @@ resource "aws_db_instance" "this" {
 
   master_user_secret_kms_key_id = aws_kms_key.this.arn
 
-  vpc_security_group_ids = [var.sg_id]
+  vpc_security_group_ids = [aws_security_group.this.id]
 
 
   db_subnet_group_name = aws_db_subnet_group.this.name

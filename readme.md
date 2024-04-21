@@ -52,3 +52,5 @@ export DB_PASSWORD=$(aws s3 cp s3://terragrunt-aws-sre/resume/shared/github/runn
 echo $(jq -r '.password' <<< ${SECRET} )
 
 export DB_PASSWORD="$(jq -r '.password' <<< ${SECRET} )"
+
+terragrunt run-all apply --terragrunt-include-dir test/rds --terragrunt-include-external-dependencies --terragrunt-strict-include

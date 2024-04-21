@@ -79,11 +79,13 @@ jobs:
         run: |
           rm -rf alembic/versions
           aws s3 sync s3://${{secrets.BUCKET_NAME}}/resume/alembic alembic/versions
-          alembic revision --autogenerate -m "first revision"
+
       - name: Generate Alembic Revision
         working-directory: ./api
         run: |
           alembic revision --autogenerate -m "GITHUBSHA ${{ github.sha }} TEST DB RUN"
+          alembic upgrade head
+
       - name: Sync Changes to S3
         working-directory: ./api
         run: |
