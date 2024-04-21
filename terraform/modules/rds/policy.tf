@@ -24,5 +24,12 @@ resource "aws_iam_policy" "this" {
 }
 
 
+resource "aws_iam_role_policy_attachment" "this" {
+  for_each   = { for idx, arn in var.iam_roles : idx => arn }
+  role       = split("/", each.value)[length(split("/", each.value)) - 1]
+  policy_arn = aws_iam_policy.this.arn
+}
+
+
 
 

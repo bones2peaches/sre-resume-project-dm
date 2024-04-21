@@ -34,3 +34,12 @@ resource "github_actions_environment_secret" "db_secret_arn" {
   plaintext_value            = aws_db_instance.this.master_user_secret[0].secret_arn
 }
 
+resource "github_actions_environment_secret" "db_name" {
+  
+
+  repository       = var.repo
+  environment      = var.env_name
+  secret_name      = "DB_NAME"
+  plaintext_value            = var.db_name
+}
+
