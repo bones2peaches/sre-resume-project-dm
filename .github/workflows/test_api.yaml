@@ -16,6 +16,7 @@ jobs:
           fetch-depth: 0
           sparse-checkout: |
             api
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -31,6 +32,61 @@ jobs:
         run: |
           export STAGE=UNIT
           pytest tests/unit
-      - name: complete
+
+  integration-test-api:
+    runs-on: self-hosted
+    environment: test
+    env:
+      PYTHONPATH: "${{ github.workspace }}/api"
+      DB_USER: "${{secrets.DB_USER }}"
+      DB_PORT: "${{secrets.DB_PORT }}"
+      DB_HOST: "${{secrets.DB_HOST }}"
+      SECRET_ID: "${{secrets.DB_SECRET_ARN }}"
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_DEFAULT_OUTPUT: json
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            api
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+      - name: install python dependencies
+        working-directory: ./api
         run: |
-          echo "PIPELINE RAN"
+          pip install -r requirements.txt
+
+      - id: install-aws-cli
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2 # default
+          verbose: false # default
+          arch: amd64 # allowed values: amd64, arm64
+
+      - name: Prepare Alembic Environment
+        working-directory: ./api
+        run: |
+          rm -rf alembic/versions
+          aws s3 sync s3://${{secrets.BUCKET_NAME}}/resume/alembic alembic/versions
+          alembic revision --autogenerate -m "first revision"
+      - name: Generate Alembic Revision
+        working-directory: ./api
+        run: |
+          alembic revision --autogenerate -m "GITHUBSHA ${{ github.sha }} TEST DB RUN"
+      - name: Sync Changes to S3
+        working-directory: ./api
+        run: |
+          aws s3 sync alembic/versions s3://${{ secrets.BUCKET_NAME }}/resume/alembic
+
+      - name: run api integration test
+        working-directory: ./api
+        run: |
+          SECRET=$(aws secretsmanager get-secret-value --secret-id $SECRET_ID --query SecretString --output text)
+          export DB_PASSWORD="$(jq -r '.password' <<< ${SECRET} )"
+          pytest tests/integration
