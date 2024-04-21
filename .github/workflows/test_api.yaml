@@ -3,7 +3,8 @@ name: Build Projects
 on:
   pull_request:
     branches:
-      - "feature-*"
+      - main
+
 jobs:
   unit-test-api:
     runs-on: ubuntu-latest
