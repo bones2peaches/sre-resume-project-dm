@@ -7,6 +7,8 @@ on:
 jobs:
   unit-test-api:
     runs-on: ubuntu-latest
+    outputs:
+      has-passed: ${{steps.test.outputs.has-passed}}
     environment: test
     env:
       PYTHONPATH: "${{ github.workspace }}/api"
@@ -28,14 +30,18 @@ jobs:
           pip install -r requirements.txt
 
       - name: run api unit tests
+        id: test
         working-directory: ./api
         run: |
           export STAGE=UNIT
           pytest tests/unit
+          echo "has-passed=true" >> "$GITHUB_OUTPUT"
 
   integration-test-api:
     runs-on: self-hosted
     environment: test
+    outputs:
+      has-passed: ${{steps.test.outputs.has-passed}}
     env:
       PYTHONPATH: "${{ github.workspace }}/api"
       PYTHONDONTWRITEBYTECODE: 1
@@ -99,6 +105,67 @@ jobs:
           aws s3 sync alembic/versions s3://${{ secrets.BUCKET_NAME }}/resume/test/alembic
 
       - name: run api integration test
+        id: test
         working-directory: ./api
         run: |
           pytest tests/integration
+          echo "has-passed=true" >> "$GITHUB_OUTPUT"
+
+  push-ecr:
+    runs-on: ubuntu-latest
+    needs: [integration-test-api, unit-test-api]
+    outputs:
+      api-has-built: ${{ steps.api.outputs.has-built }}
+      nchan-has-built: ${{ steps.nchan.outputs.has-built }}
+    environment: test
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_DEFAULT_OUTPUT: json
+      AWS_ACCOUNT_ID:
+      ECR_NAME: ${{ secrets.ECR_NAME }}
+
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ needs.unit-test-api.outputs.has-passed == 'true' }} && ${{ needs.integration-test-api.outputs.has-passed == 'true' }}
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            api
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: $AWS_DEFAULT_REGION
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push API docker image to Amazon ECR
+        working-directory: ./api
+        id: api
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_NAME }}
+          IMAGE_TAG: "api-${{ github.sha }}"
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          echo "has-built=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build, tag, and push NCHAN docker image to Amazon ECR
+        working-directory: ./api/nchan
+        id: nchan
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_NAME }}
+          IMAGE_TAG: "nchan-${{ github.sha }}"
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          echo "has-built=true" >> "$GITHUB_OUTPUT"

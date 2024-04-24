@@ -5,4 +5,5 @@ export TF_VAR_environment_secrets="{\"VERCEL_API_TOKEN\": \"$VERCEL_API_TOKEN\",
  \"AWS_ACCESS_KEY_ID\": \"$AWS_ACCESS_KEY_ID\",
   \"AWS_SECRET_ACCESS_KEY\": \"$AWS_SECRET_ACCESS_KEY\",
      \"BUCKET_NAME\" : \"$BUCKET_NAME\",
+     \"AWS_ACCOUNT_ID\" : \"$AWS_ACCOUNT_ID\",
 }"

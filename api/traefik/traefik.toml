@@ -1,0 +1,16 @@
+
+# [ecs]
+# autoDiscoverClusters = false
+#     cluster: "your-ecs-cluster-name"
+#     region: "your-aws-region"
+#     refreshSeconds: 15
+#     accessKeyID: "${AWS_ACCESS_KEY_ID}"
+#     secretAccessKey: "${AWS_SECRET_ACCESS_KEY}"
+
+# # Dynamic configuration
+# http:
+#   middlewares:
+#     add-header-middleware:
+#       headers:
+#         customRequestHeaders:
+#           X-Your-Header: "YourValue"

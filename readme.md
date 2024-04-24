@@ -53,6 +53,6 @@ echo $(jq -r '.password' <<< ${SECRET} )
 
 export DB_PASSWORD="$(jq -r '.password' <<< ${SECRET} )"
 
-terragrunt run-all apply --terragrunt-include-dir test/rds --terragrunt-include-external-dependencies --terragrunt-strict-include
+terragrunt run-all apply --terragrunt-include-dir test/ecr --terragrunt-include-external-dependencies --terragrunt-strict-include
 
 scp -i temp_key.pem /mnt/c/Users/Dones/fa-fork/tests/devops/postgres/test_connection.py ubuntu@${INSTANCE_IP}:/home/ubuntu/test_connection.py
