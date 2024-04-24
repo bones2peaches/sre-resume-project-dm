@@ -34,6 +34,15 @@ resource "aws_ecs_task_definition" "this" {
           "name" : "DB_PORT",
           "value" : "${var.db_port}"
         },
+        { "name" : "NCHAN_USER",
+        "value" : "${var.nchan_username}" },
+        { "name" : "NCHAN_PASSWORD",
+        "value" : "${var.nchan_password}" },
+        { "name" : "NCHAN_PROTOCOL",
+        "value" : "${var.nchan_protocol}" },
+        { "name" : "NCHAN_HOST",
+        "value" : "${var.nchan_host}" },
+
         { "name" : "STAGE",
         "value" : "${var.env}" }
       ]

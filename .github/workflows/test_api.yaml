@@ -194,6 +194,8 @@ jobs:
         env:
           BUCKET_NAME: ${{secrets.BUCKET_NAME}}
           TF_VAR_github_sha: ${{github.sha}}
+          TF_VAR_nchan_username: ${{secrets.NCHAN_USERNAME}}
+          TF_VAR_nchan_password: ${{secrets.NCHAN_PASSWORD}}
         uses: gruntwork-io/terragrunt-action@v2
         if: ${{needs.push-ecr.outputs.api-has-built == 'true'}}
 

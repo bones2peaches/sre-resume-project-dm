@@ -137,3 +137,20 @@ variable "github_sha" {
 
 }
 
+variable "nchan_username" {
+
+
+}
+
+variable "nchan_password" {
+
+}
+
+variable "nchan_protocol" {
+  default = "http"
+}
+
+variable "nchan_host" {
+  default = "nchan"
+}
+
