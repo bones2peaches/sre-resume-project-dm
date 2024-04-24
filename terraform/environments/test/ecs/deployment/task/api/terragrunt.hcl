@@ -1,5 +1,5 @@
 terraform {
-  source = "../../../../../../modules/ecs/deployment/svc/api"
+  source = "../../../../../../modules/ecs/deployment/task/api"
 }
 
 include "root" {
