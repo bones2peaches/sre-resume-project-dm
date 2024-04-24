@@ -16,24 +16,16 @@ async def get_public_ip():
         return ip_data["ip"]
 
 
+@router.get("", status_code=status.HTTP_200_OK)
+async def healthcheck():
+    public_ip = await get_public_ip()  # Retrieve the public IP
+    return {"status": "OK"}
+
+
 @router.get("/ip", status_code=status.HTTP_200_OK)
 async def healthcheck_ip():
     public_ip = await get_public_ip()  # Retrieve the public IP
     return {"status": "OK", "ip": public_ip}
-
-
-@router.get("/postgres", status_code=status.HTTP_200_OK)
-async def postgres_healthcheck(db: AsyncSession = Depends(get_db)):
-    try:
-        result = await db.execute(select(1))
-        _ = result.fetchall()
-        resp = {"status": "OK"}
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database connection error",
-        )
-    return resp
 
 
 @router.get("/postgres", status_code=status.HTTP_200_OK)
