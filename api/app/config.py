@@ -4,16 +4,23 @@ from urllib.parse import quote_plus
 from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
 import json
+from json import JSONDecodeError
 
-stage = os.getenv("STAGE")
-
-if stage == "UNIT":
+stage = os.getenv("STAGE").lower()
+if stage == "unit":
     pg_url = f"postgresql+asyncpg://unit:unit@unit:5432/unit"
 
-elif stage == "TEST":
-    secret = json.loads(os.getenv("DB_PASSWORD"))
-    DB_USER = secret["username"]
-    DB_PASSWORD = db_password = quote_plus(secret["password"])
+elif stage == "test":
+
+    try:
+        secret = json.loads(os.getenv("DB_PASSWORD"))
+        DB_USER = secret["username"]
+        DB_PASSWORD = db_password = quote_plus(secret["password"])
+
+    except JSONDecodeError:
+        DB_USER = os.getenv("DB_USER")
+        DB_PASSWORD = os.getenv("DB_PASSWORD")
+
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
     DB_NAME = os.getenv("DB_NAME")

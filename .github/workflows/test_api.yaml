@@ -74,7 +74,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y unzip jq
+          sudo apt-get install -y unzip
 
       - id: install-aws-cli
         uses: unfor19/install-aws-cli-action@v1
@@ -90,8 +90,7 @@ jobs:
           rm -rf alembic/versions
           aws s3 sync s3://${{ secrets.BUCKET_NAME }}/resume/test/alembic alembic/versions
           SECRET=$(aws secretsmanager get-secret-value --secret-id $SECRET_ID --query SecretString --output text)
-          export DB_PASSWORD="$(jq -r '.password' <<< ${SECRET} )"
-          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+          echo "DB_PASSWORD=$SECRET" >> $GITHUB_ENV
 
       - name: Generate Alembic Revision
         working-directory: ./api
@@ -201,7 +200,7 @@ jobs:
         with:
           tf_version: 1.7.5
           tg_version: 0.55.14
-          tg_dir: terraform/environments/${{ github.job.environment.name }}/ecs/deployment/task
+          tg_dir: terraform/environments/${{ github.job.environment.name }}/ecs/deployment/task/api
           tg_command: "apply"
 
 
