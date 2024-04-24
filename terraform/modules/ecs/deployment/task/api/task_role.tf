@@ -1,11 +1,3 @@
-resource "aws_iam_role_policy_attachment" "tasks_attachments" {
-  count = length(var.exec_policies)
-
-
-
-  role       = aws_iam_role.task_role_name
-  policy_arn = var.exec_policies[count.index]
-}
 
 
 
@@ -31,4 +23,12 @@ resource "aws_iam_role" "task_role" {
   ]
 }
 EOF
+}
+resource "aws_iam_role_policy_attachment" "tasks_attachments" {
+  count      = length(var.exec_policies)
+  depends_on = [aws_iam_role.task_role]
+
+
+  role       = "${var.project}-${var.env}-ecs-task-role"
+  policy_arn = var.exec_policies[count.index]
 }

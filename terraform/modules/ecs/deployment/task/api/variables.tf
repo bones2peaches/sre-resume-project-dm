@@ -4,8 +4,8 @@ variable "env" {
 }
 
 variable "project" {
-    description = "prefix for resources for a given project"
-    type = string
+  description = "prefix for resources for a given project"
+  type        = string
 }
 
 
@@ -17,9 +17,7 @@ variable "exec_policies" {
   type = list(string)
 }
 
-variable "image_tag" {
 
-}
 
 variable "ecr_name" {
 
@@ -30,12 +28,12 @@ variable "ecr_name" {
 
 variable "cpu" {
   default = 2048
-  type = string
+  type    = string
 }
 
 variable "memory" {
   default = 4096
-  type = string
+  type    = string
 }
 
 variable "db_name" {
@@ -51,17 +49,17 @@ variable "db_hostname" {
 }
 
 variable "host_port" {
-  type = number
+  type    = number
   default = 5000
 }
 
 variable "container_port" {
-  type = number
+  type    = number
   default = 5000
 }
 
 variable "rds_secret_arn" {
-  
+
 }
 
 variable "vpc_id" {
@@ -75,7 +73,7 @@ variable "container_name" {
 
 
 variable "cluster_arn" {
-  
+
 }
 
 variable "health_check_enabled" {
@@ -85,7 +83,7 @@ variable "health_check_enabled" {
 
 variable "health_check_interval" {
   description = "The approximate amount of time, in seconds, between health checks of an individual target"
-  default = 60
+  default     = 60
 }
 
 variable "health_check_path" {
@@ -116,21 +114,8 @@ variable "service_subnets" {
 
 
 
-variable "task_role_name" {
-  type = string
-}
 
-variable "exec_role_name" {
-  type = string
-}
 
-variable "task_role_arn" {
-  
-}
-
-variable "exec_role_arn" {
-  
-}
 
 
 
@@ -142,18 +127,13 @@ variable "log_group_name" {
 
 }
 
-variable "pull_policy_arn" {
-    
-}
 
-variable "secrets_policy_arn" {
-  
-}
 
 variable "app" {
-  
+
 }
 
-variable "lb_arn" {
-  
+variable "github_sha" {
+
 }
+

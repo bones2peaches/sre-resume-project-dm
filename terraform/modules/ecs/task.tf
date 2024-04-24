@@ -1,14 +1,14 @@
 resource "aws_ecs_task_definition" "this" {
-  depends_on = [ aws_cloudwatch_log_group.this ]
+  depends_on               = [aws_cloudwatch_log_group.this]
   family                   = "${var.project}-${var.env}task-family"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = var.cpu
-  memory = var.memory
+  memory                   = var.memory
 
-  task_role_arn      = var.task_role_arn
+  task_role_arn      = aws_iam_roketask_role_arn
   execution_role_arn = var.exec_role_arn
-  
+
 
   container_definitions = jsonencode([
     {
@@ -32,10 +32,10 @@ resource "aws_ecs_task_definition" "this" {
         },
         {
           "name" : "DB_PORT",
-            "value" : "${var.db_port}"
+          "value" : "${var.db_port}"
         },
-        {"name" : "STAGE" ,
-        "value" : "${var.env}"}
+        { "name" : "STAGE",
+        "value" : "${var.env}" }
       ]
       secrets = [
         {
