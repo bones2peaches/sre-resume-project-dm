@@ -202,7 +202,7 @@ jobs:
         with:
           tf_version: 1.7.5
           tg_version: 0.55.14
-          tg_dir: terraform/environments/${{ github.job.environment.name }}/ecs/deployment/task/api
+          tg_dir: terraform/environments/test/ecs/deployment/task/api
           tg_command: "apply"
 
 
