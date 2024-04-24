@@ -4,14 +4,10 @@ variable "env" {
 }
 
 variable "project" {
-    description = "prefix for resources for a given project"
-    type = string
+  description = "prefix for resources for a given project"
+  type        = string
 }
 
-variable "region_names" {
-  type = list(string)
-  default = [ "us-east-1" ]
-}
 
 variable "task_policies" {
   type = list(string)
@@ -34,12 +30,12 @@ variable "ecr_name" {
 
 variable "cpu" {
   default = 2048
-  type = string
+  type    = string
 }
 
 variable "memory" {
   default = 4096
-  type = string
+  type    = string
 }
 
 variable "db_name" {
@@ -54,18 +50,20 @@ variable "db_hostname" {
 
 }
 
+
+
 variable "host_port" {
-  type = number
+  type    = number
   default = 5000
 }
 
 variable "container_port" {
-  type = number
+  type    = number
   default = 5000
 }
 
 variable "rds_secret_arn" {
-  
+
 }
 
 variable "vpc_id" {
@@ -88,7 +86,7 @@ variable "health_check_enabled" {
 
 variable "health_check_interval" {
   description = "The approximate amount of time, in seconds, between health checks of an individual target"
-  default = 60
+  default     = 60
 }
 
 variable "health_check_path" {
@@ -117,21 +115,17 @@ variable "service_subnets" {
   type = list(string)
 }
 
-variable "lb_subnet_ids" {
-    type = list(string)
-}
-
 variable "zone_id" {
-    type = string
+  type = string
 }
 
 
 variable "svc_sg_id" {
-    type = string
+  type = string
 }
 
 variable "lb_sg_id" {
-    type = string
+  type = string
 }
 
 variable "task_role_name" {
@@ -143,9 +137,12 @@ variable "exec_role_name" {
 }
 
 variable "task_role_arn" {
-  
+
 }
 
 variable "exec_role_arn" {
-  
+
 }
+
+
+

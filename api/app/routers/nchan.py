@@ -14,7 +14,7 @@ from app.schema.chatroom import (
     CountUpdate,
 )
 
-from app.redis_cache import get_redis
+
 from redis.asyncio.cluster import RedisCluster
 
 from app.schema.nchan import NchanResponse

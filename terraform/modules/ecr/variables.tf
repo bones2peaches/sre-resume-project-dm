@@ -17,3 +17,7 @@ variable "iam_roles" {
   description = "iam roles that can push and pull from repo"
   type = list(string)
 }
+
+variable "repo" {
+  
+}

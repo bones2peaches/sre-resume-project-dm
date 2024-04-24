@@ -1,49 +1,39 @@
 import os
 
+from urllib.parse import quote_plus
 from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
+import json
+from json import JSONDecodeError
 
-
-stage = os.getenv("STAGE")
-
-if stage == "UNIT":
+stage = os.getenv("STAGE").lower()
+if stage == "unit":
     pg_url = f"postgresql+asyncpg://unit:unit@unit:5432/unit"
-    jwt_algo = os.getenv("JWT_ALGORITHM", "HS256")
-    jwt_expire = os.getenv("JWT_EXPIRE", "30")
-    jwt_key = os.getenv(
-        "JWT_KEY", "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-    )
 
+elif stage == "test":
 
-if stage != "UNIT":
-    jwt_algo = os.getenv("JWT_ALGORITHM", "HS256")
-    jwt_expire = os.getenv("JWT_EXPIRE", "30")
-    jwt_key = os.getenv(
-        "JWT_KEY", "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-    )
-    if stage == "DEV":
-        db_host = os.environ.get("DB_HOST")
-        db_port = os.environ.get("DB_PORT")
-        db_name = os.environ.get("DB_NAME")
-        db_user = os.getenv("DB_USER")
-        db_password = os.getenv("DB_PASSWORD")
-        pg_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-
-    elif stage == "dev":
-        import json
-        from urllib.parse import quote_plus
-
+    try:
         secret = json.loads(os.getenv("DB_PASSWORD"))
-        print(secret)
-        db_password = quote_plus(secret["password"])
-        db_host = os.environ.get("DB_HOST")
-        db_port = os.environ.get("DB_PORT")
-        db_name = os.environ.get("DB_NAME")
-        db_user = secret["username"]
+        DB_USER = secret["username"]
+        DB_PASSWORD = db_password = quote_plus(secret["password"])
 
-        pg_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    except JSONDecodeError:
+        DB_USER = os.getenv("DB_USER")
+        DB_PASSWORD = os.getenv("DB_PASSWORD")
 
-        print(pg_url)
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT")
+    DB_NAME = os.getenv("DB_NAME")
+    pg_url = (
+        f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
+
+
+jwt_algo = os.getenv("JWT_ALGORITHM", "HS256")
+jwt_expire = os.getenv("JWT_EXPIRE", "30")
+jwt_key = os.getenv(
+    "JWT_KEY", "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+)
 
 
 class Settings(BaseSettings):

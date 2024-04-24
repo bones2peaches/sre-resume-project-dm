@@ -38,7 +38,7 @@ async def client(start_db) -> AsyncClient:
 
     async with AsyncClient(
         app=app,
-        base_url=f"http://testserver/api/{stage.lower()}",
+        base_url=f"http://testserver/api",
         headers={"Content-Type": "application/json"},
     ) as test_client:
         yield test_client

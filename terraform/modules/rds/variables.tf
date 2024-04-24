@@ -17,6 +17,15 @@ variable "db_port" {
 
 
 
+variable "repo" {
+  
+}
+
+variable "env_name" {
+  
+}
+
+
 
 variable "db_name" {
   description = "name of the database"

@@ -4,7 +4,7 @@ resource "aws_lb" "this" {
   load_balancer_type         = "application"
   security_groups            = [var.lb_sg_id]
   enable_deletion_protection = false
-  subnets                    = var.lb_subnet_ids
+  # subnets                    = var.lb_subnet_ids
 
 }
 
@@ -28,13 +28,13 @@ resource "aws_lb_target_group" "this" {
 
 # Step 5: Create a Listener
 resource "aws_lb_listener" "this" {
-  depends_on = [ aws_acm_certificate_validation.this ]
+  depends_on        = [aws_acm_certificate_validation.this]
   load_balancer_arn = aws_lb.this.arn
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
   certificate_arn   = aws_acm_certificate_validation.this.certificate_arn
-  
+
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.this.arn
