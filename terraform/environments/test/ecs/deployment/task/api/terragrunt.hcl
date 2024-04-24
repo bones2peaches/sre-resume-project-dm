@@ -14,7 +14,7 @@ include "env" {
 
 inputs = {
   env               = include.env.locals.env
-  project         = "sredevops"  
+  project         = "sredevops-dm"  
   exec_policies = [dependency.ecr.outputs.pull_policy_arn , dependency.rds.outputs.kms_sm_policy_arn ]
   task_policies = []
   ecr_name = dependency.ecr.outputs.ecr_name
